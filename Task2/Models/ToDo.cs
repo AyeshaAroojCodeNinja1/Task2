@@ -9,5 +9,6 @@ namespace Task2.Models
         public bool IsCompleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
+        public string CreatedBy { get; set; }
     }
 }

@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Task2.Data;
 using Task2.Models;
+using Task2.Policies;
 
 namespace Task2.Controllers
 {
@@ -13,7 +16,7 @@ namespace Task2.Controllers
         {
             _repository = repository;
         }
-
+        [Authorize(Policy = CustomPolicies.SameUserOrAdmin)]
         [HttpGet]        
         public ActionResult<IEnumerable<ToDo>> GetAll()
         {
@@ -21,6 +24,7 @@ namespace Task2.Controllers
             return Ok(toDo);
         }
 
+        [Authorize(Policy = CustomPolicies.SameUserOrAdmin)]
         [HttpGet("{id}")]
         public ActionResult<ToDo> GetById(int id)
         {
@@ -28,6 +32,7 @@ namespace Task2.Controllers
             return toDo == null ? NotFound() : Ok(toDo);
         }
 
+        [Authorize(Policy = CustomPolicies.SameUserOrAdmin)]
         [HttpPost]       
         public ActionResult<ToDo> Post([FromBody] ToDo item)
         {
@@ -38,6 +43,7 @@ namespace Task2.Controllers
 
             try
             {
+                item.CreatedBy = GetLoggedInUserId();
                 var addedItem = _repository.Create(item);
 
                 return CreatedAtAction(nameof(GetById), new { id = addedItem.Id }, item);
@@ -47,8 +53,18 @@ namespace Task2.Controllers
                 return StatusCode(500, "An error occurred while processing the request. Please try again later." + ex.Message);
             }
         }
+        private string GetLoggedInUserId()
+        {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                return identity.Name;
+            }
+            return null;
+        }
 
-        [HttpPut("{id}")]
+        [Authorize(Policy = CustomPolicies.SameUserOrAdmin)]
+        [HttpPut("{id}")]        
         public IActionResult Put(int id, [FromBody] ToDo item)
         {
             var existingItem = _repository.GetById(id);
@@ -70,7 +86,7 @@ namespace Task2.Controllers
             }
         }
 
-        
+        [Authorize(Policy = CustomPolicies.SameUserOrAdmin)]
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
