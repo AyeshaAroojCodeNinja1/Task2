@@ -3,7 +3,7 @@ using Task2.Models;
 
 namespace Task2.Data
 {
-    public class ToDoRepository
+    public class ToDoRepository : IToDoRepository
     {
         private readonly ToDoDbContext _context;
         public ToDoRepository(ToDoDbContext context)

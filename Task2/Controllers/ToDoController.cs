@@ -11,7 +11,7 @@ namespace Task2.Controllers
     [ApiController]
     public class ToDoController : Controller
     {
-        private readonly ToDoRepository _repository;
+        private readonly IToDoRepository _repository;
         public ToDoController(ToDoRepository repository)
         {
             _repository = repository;
